@@ -1,32 +1,14 @@
 <?php
     declare(strict_types= 1);
     
-    
     $rutaFichero = __DIR__ .'/datos/reservas.csv';
-    function dump($var)
-    {
-        echo "<br><pre>";
-        var_dump($var);
-        echo "</pre>";
-    }
 
     $pistaSeleccionada = $_GET['filtroP'] ?? '';
     $fechaSeleccionada = $_GET['filtroF'] ?? '';
 
+    require __DIR__ . '/src/functions.php';
 
-    $reservas = [];
-    if (($stream = fopen($rutaFichero, 'r')) !== false) {
-    // 3. Recorrer línea por línea con fgetcsv
-    // Parametros: $stream, tamaño max por línea (0 = sin límite), delimitador (habitualmente ',' o ';')
-    $cabecera = fgetcsv($stream, 0, ','); 
-    while (($fila = fgetcsv($stream, 0, ',')) !== false) {
-        if (count($cabecera) === count($fila)) {
-            $reservas[] = array_combine($cabecera, $fila);
-        }
-    }
-    // 4. Cerrar siempre el archivo
-    fclose($stream);
-    }
+    $reservas = cargarReservas($rutaFichero);
 
 ?>
 <!DOCTYPE html>
@@ -47,21 +29,7 @@
         }
 </style>
 <body>
-    <table>
-        <?php foreach ($reservas as $fila): ?>
-        <?php
-            if (
-                ($pistaSeleccionada == '' || $fila["pista"] == $pistaSeleccionada) &&
-                ($fechaSeleccionada == '' || $fila["fecha"] == $fechaSeleccionada)
-            ):?>
-            <tr>
-                <?php foreach ($fila as $valor): ?>
-                    <td><?php echo htmlspecialchars($valor); ?></td>
-                <?php endforeach; ?>
-            </tr>
-            <?php endif; ?>
-        <?php endforeach; ?>
-    </ul>
+    <?php mostrarReservasFiltradas($reservas,$pistaSeleccionada,$fechaSeleccionada); ?>
     <form action="<?php $_SERVER["PHP_SELF"] ?>" method="get">
         <select id="filtrarPista" name="filtroP">
             <option value=''>por defecto</option>
@@ -74,6 +42,5 @@
         <button type="submit1">submit</button>
     </form>
     <a href="reservar.php">hacer una reserva</a>
-    
 </body>
 </html>
